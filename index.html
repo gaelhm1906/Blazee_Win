@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Sports Predictor</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { text-align: center; color: #333; }
+        .card { 
+            background: white; 
+            border-radius: 10px; 
+            padding: 20px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .match-title { font-weight: bold; font-size: 1.1em; }
+        .prediction { color: #2ecc71; font-weight: bold; }
+        .badge { padding: 5px 10px; border-radius: 5px; color: white; font-size: 0.8em; }
+        .high { background-color: #e74c3c; } /* Rojo para alta confianza (Hot) */
+        .medium { background-color: #f39c12; }
+        .low { background-color: #95a5a6; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🤖 Predictor Deportivo v1.0</h1>
+    <p style="text-align: center; color: #666;">Datos actualizados automáticamente</p>
+    
+    <div id="lista-predicciones">
+        <!-- Aquí se cargarán los datos -->
+        <p style="text-align:center">Cargando análisis...</p>
+    </div>
+</div>
+
+<script>
+    // Función para cargar el JSON generado por Python
+    async function cargarPredicciones() {
+        try {
+            // Nota: Para que esto funcione en local, necesitas un "Live Server" 
+            // o subir ambos archivos a un hosting real.
+            const response = await fetch('datos_apuestas.json'); 
+            const datos = await response.json();
+            
+            const contenedor = document.getElementById('lista-predicciones');
+            contenedor.innerHTML = '';
+
+            datos.forEach(item => {
+                let claseConfianza = 'low';
+                if(item.confianza === 'ALTA') claseConfianza = 'high';
+                if(item.confianza === 'MEDIA') claseConfianza = 'medium';
+
+                const html = `
+                    <div class="card">
+                        <div>
+                            <div class="match-title">${item.partido}</div>
+                            <small>Probabilidad: ${item.probabilidad_calculada}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="prediction">${item.prediccion}</div>
+                            <span class="badge ${claseConfianza}">${item.confianza}</span>
+                        </div>
+                    </div>
+                `;
+                contenedor.innerHTML += html;
+            });
+
+        } catch (error) {
+            console.error('Error cargando datos:', error);
+            document.getElementById('lista-predicciones').innerHTML = 
+                '<p style="text-align:center; color:red">Error al cargar predicciones. Asegúrate de ejecutar el script de Python primero.</p>';
+        }
+    }
+
+    cargarPredicciones();
+</script>
+
+</body>
+</html>
